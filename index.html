@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRIFT — A Speculative Invention Game</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --pink: #E8457A;
+    --blue: #3B81F5;
+    --green: #3EC78B;
+    --bg: #0C0C14;
+    --surface: #1C1C28;
+    --border: #363648;
+    --border-light: #282838;
+    --text: #EDEDF4;
+    --text-mid: #9A9AB2;
+    --text-dim: #6E6E86;
+  }
+
+  body {
+    font-family: 'Instrument Sans', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  /* === HERO === */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Background triangle */
+
+  /* Registration-offset title */
+  .drift-title {
+    position: relative;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: clamp(5rem, 14vw, 12rem);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1;
+    z-index: 1;
+  }
+
+  .drift-title .t-green { position: relative; color: var(--bg); opacity: 0.8; z-index: 3; }
+  .drift-title .t-pink {
+    position: absolute; top: 0; left: 0;
+    color: var(--pink); z-index: 1; opacity: 0.5;
+    transform: translate(-4px, -3px);
+  }
+  .drift-title .t-blue {
+    position: absolute; top: 0; left: 0;
+    color: var(--blue); z-index: 2; opacity: 0.4;
+    transform: translate(5px, 3px);
+  }
+
+  .subtitle {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: clamp(1rem, 2.5vw, 1.35rem);
+    color: var(--text-mid);
+    margin-top: 1rem;
+    z-index: 1;
+    font-weight: 500;
+  }
+
+  .tagline {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-top: 2rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    z-index: 1;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    animation: bob 2.5s ease-in-out infinite;
+    z-index: 1;
+  }
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+  }
+
+  /* === SECTIONS === */
+  section {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+  }
+
+  h2 {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    position: relative;
+  }
+
+  /* Section title color accents */
+  h2 .a-pink { color: var(--pink); }
+  h2 .a-blue { color: var(--blue); }
+  h2 .a-green { color: var(--green); }
+
+  p { color: var(--text-mid); margin-bottom: 1rem; font-size: 1rem; }
+  p strong { color: var(--text); font-weight: 600; }
+
+  .divider {
+    width: 100%;
+    max-width: 820px;
+    margin: 0 auto;
+    height: 1px;
+    position: relative;
+  }
+
+  .divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--border);
+    top: 0;
+  }
+
+  .divider::after, .divider .div-line { display: none; }
+
+  /* === PREMISE BOX === */
+  .premise-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2.5rem;
+    margin: 2rem 0;
+    position: relative;
+  }
+
+  .premise-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--green);
+  }
+
+  .premise-box::after {
+    content: '';
+    position: absolute;
+    top: -1px; left: -3px; right: 3px;
+    height: 2px;
+    background: var(--pink);
+    opacity: 0.35;
+  }
+
+  .premise-box p {
+    color: var(--text-mid);
+    font-size: 1.05rem;
+    line-height: 1.75;
+    margin: 0;
+  }
+
+  /* === STATS === */
+  .stats {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 2.5rem 0;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem 1.5rem;
+    flex: 1;
+    min-width: 130px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .stat-label {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: 0.2rem;
+  }
+
+  /* === CARD DECKS === */
+  .deck-section { margin: 2.5rem 0; }
+
+  .deck-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 1.2rem;
+  }
+
+  .deck-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    border: 1.5px solid;
+  }
+
+  .deck-icon.world-icon { border-color: var(--green); color: var(--green); }
+  .deck-icon.who-icon { border-color: var(--pink); color: var(--pink); }
+  .deck-icon.wild-icon { border-color: var(--blue); color: var(--blue); }
+
+  .deck-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .deck-desc {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 1px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 8px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--text);
+    transition: all 0.2s;
+    cursor: default;
+    position: relative;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .card.world-card::before { background: #3EC78B; }
+  .card.who-card::before { background: #E8457A; }
+  .card.wild-card::before { background: #3B81F5; }
+
+  .card:hover { transform: translateY(-1px); box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+
+  .card-label {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.55rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 6px;
+  }
+
+  .world-card .card-label { color: var(--green); opacity: 0.4; }
+  .who-card .card-label { color: var(--pink); opacity: 0.5; }
+  .wild-card .card-label { color: var(--blue); opacity: 0.5; }
+
+  /* === ROUNDS === */
+  .round {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    margin: 1.2rem 0;
+    position: relative;
+  }
+
+  .round-number {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    margin-bottom: 0.5rem;
+  }
+
+  .round-number.r1 { color: var(--green); }
+  .round-number.r2 { color: var(--pink); }
+  .round-number.r3 { color: var(--blue); }
+  .round-number.r4 { color: var(--text-mid); }
+
+  .round h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.6rem;
+  }
+
+  .round p { color: var(--text-mid); font-size: 0.92rem; margin-bottom: 0.5rem; }
+  .round p:last-child { margin-bottom: 0; }
+
+  .time-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 0.8rem;
+    letter-spacing: 0.05em;
+  }
+
+  .time-badge.t1 { background: rgba(62,199,139,0.08); color: var(--green); }
+  .time-badge.t2 { background: rgba(232,69,122,0.08); color: var(--pink); }
+  .time-badge.t3 { background: rgba(59,129,245,0.08); color: var(--blue); }
+  .time-badge.t4 { background: rgba(26,26,26,0.04); color: var(--text-mid); }
+
+  /* === EXAMPLES === */
+  .example-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .example-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+  }
+
+  .example-cards {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .example-card {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid;
+    letter-spacing: 0.02em;
+  }
+
+  .example-card.eg { border-color: rgba(62,199,139,0.2); color: var(--green); }
+  .example-card.ew { border-color: rgba(232,69,122,0.2); color: var(--pink); }
+  .example-card.ec { border-color: rgba(59,129,245,0.2); color: var(--blue); }
+
+  .example-pitch {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--text-mid);
+    line-height: 1.7;
+  }
+
+  .example-pitch strong {
+    color: var(--text);
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 700;
+  }
+
+  /* === ARTIFACT MOCKUPS === */
+  .mockups-section {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+  }
+
+  .mockups-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 2.5rem;
+  }
+
+  .mockup-item {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .mockup-frame-wrap {
+    height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mockup-meta {
+    padding: 0 4px;
+  }
+
+  .mockup-type {
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 4px;
+  }
+
+  .mockup-type.mt-game { color: var(--pink); }
+  .mockup-type.mt-webapp { color: var(--green); }
+  .mockup-type.mt-desktop { color: var(--blue); }
+
+  .mockup-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .mockup-tagline {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    line-height: 1.45;
+  }
+
+  /* Phone frame */
+  .phone-frame {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+    width: 220px;
+    height: 420px;
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+  }
+
+  .phone-notch {
+    width: 70px;
+    height: 5px;
+    background: var(--border);
+    border-radius: 3px;
+    margin: 8px auto 0;
+    flex-shrink: 0;
+  }
+
+  .phone-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Browser frame */
+  .browser-frame {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+    height: 340px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .browser-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .browser-dots {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .browser-dots span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  .browser-url {
+    flex: 1;
+    background: var(--bg);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 0.55rem;
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+  }
+
+  .browser-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 14px;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Desktop frame */
+  .desktop-frame {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+    height: 340px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .desktop-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .desktop-titlebar .browser-dots span {
+    width: 6px;
+    height: 6px;
+  }
+
+  .desktop-titlebar-text {
+    flex: 1;
+    font-size: 0.55rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-align: center;
+    letter-spacing: 0.06em;
+  }
+
+  .desktop-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 14px;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Shared mockup inner elements */
+  .mu-header {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .mu-sub {
+    font-size: 0.55rem;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+
+  .mu-btn {
+    display: inline-block;
+    font-size: 0.55rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 6px 14px;
+    border-radius: 5px;
+    text-align: center;
+  }
+
+  .mu-btn-pink { background: var(--pink); color: #0C0C14; }
+  .mu-btn-green { background: var(--green); color: #0C0C14; }
+  .mu-btn-blue { background: var(--blue); color: #0C0C14; }
+  .mu-btn-ghost { border: 1px solid var(--border); color: var(--text-dim); background: transparent; }
+
+  .mu-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+
+  .mu-label {
+    font-size: 0.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    margin-bottom: 3px;
+  }
+
+  .mu-value {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .mu-pill {
+    display: inline-block;
+    font-size: 0.48rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .mu-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 0;
+  }
+
+  .mu-circle {
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .mu-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mu-spacer { flex: 1; }
+
+  .mu-progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .mu-progress-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+
+  @media (max-width: 900px) {
+    .mockups-grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+      max-width: 380px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .mockup-frame-wrap { height: auto; }
+    .phone-frame { width: 240px; height: 440px; }
+    .browser-frame, .desktop-frame { height: 300px; }
+  }
+
+  /* === TIPS === */
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+    margin-top: 1.5rem;
+  }
+
+  .tip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.4rem;
+  }
+
+  .tip-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: var(--text);
+  }
+
+  .tip p { font-size: 0.85rem; color: var(--text-dim); margin: 0; }
+
+  /* === FOOTER === */
+  .footer {
+    text-align: center;
+    padding: 5rem 2rem;
+    position: relative;
+  }
+
+  .footer-logo {
+    position: relative;
+    display: inline-block;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .footer-logo .f-green { color: var(--bg); opacity: 0.8; }
+  .footer-logo .f-pink { position: absolute; top: -1px; left: -2px; color: var(--pink); opacity: 0.4; z-index: 1; }
+  .footer-logo .f-blue { position: absolute; top: 1px; left: 2px; color: var(--blue); opacity: 0.3; z-index: 2; }
+
+  .footer p { font-size: 0.75rem; color: var(--text-dim); }
+
+  /* === SHUFFLER SECTION === */
+  .shuffler-section {
+    text-align: center;
+    margin: 2rem 0;
+    padding: 3rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .shuffler-stage {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    padding: 20px 0;
+    margin: 1.5rem 0;
+  }
+
+  .card-slot {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 240px;
+    aspect-ratio: 5 / 7;
+    perspective: 900px;
+  }
+
+  .card-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+  }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Card Back */
+  .card-back {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-back-inner {
+    width: 82%;
+    height: 74%;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .card-back-inner::before,
+  .card-back-inner::after,
+  .card-back-inner .back-line {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid;
+    border-radius: 8px;
+  }
+
+  .world-back .card-back-inner::before { border-color: var(--green); opacity: 0.15; }
+  .world-back .card-back-inner::after { border-color: var(--pink); opacity: 0.12; transform: translate(-2px, -2px); }
+  .world-back .card-back-inner .back-line { border-color: var(--blue); opacity: 0.1; transform: translate(2px, 2px); }
+  .who-back .card-back-inner::before { border-color: var(--pink); opacity: 0.15; }
+  .who-back .card-back-inner::after { border-color: var(--green); opacity: 0.12; transform: translate(-2px, -2px); }
+  .who-back .card-back-inner .back-line { border-color: var(--blue); opacity: 0.1; transform: translate(2px, 2px); }
+  .wild-back .card-back-inner::before { border-color: var(--blue); opacity: 0.15; }
+  .wild-back .card-back-inner::after { border-color: var(--pink); opacity: 0.12; transform: translate(-2px, -2px); }
+  .wild-back .card-back-inner .back-line { border-color: var(--green); opacity: 0.1; transform: translate(2px, 2px); }
+
+  .card-back-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    z-index: 2;
+  }
+
+  /* Card Front */
+  .card-front {
+    transform: rotateY(180deg);
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+  }
+
+  .card-front.world-front { border-top: 3px solid var(--green); }
+  .card-front.who-front { border-top: 3px solid var(--pink); }
+  .card-front.wild-front { border-top: 3px solid var(--blue); }
+
+  .card-front::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 0;
+    right: 0;
+    height: 3px;
+  }
+
+  .card-front.world-front::before { background: var(--pink); transform: translateX(-3px); opacity: 0.4; }
+  .card-front.world-front::after { content: ''; position: absolute; top: -3px; left: 0; right: 0; height: 3px; background: var(--blue); transform: translateX(3px); opacity: 0.3; }
+  .card-front.who-front::before { background: var(--green); transform: translateX(3px); opacity: 0.3; }
+  .card-front.who-front::after { content: ''; position: absolute; top: -3px; left: 0; right: 0; height: 3px; background: var(--blue); transform: translateX(-3px); opacity: 0.3; }
+  .card-front.wild-front::before { background: var(--pink); transform: translateX(-2px); opacity: 0.4; }
+  .card-front.wild-front::after { content: ''; position: absolute; top: -3px; left: 0; right: 0; height: 3px; background: var(--green); transform: translateX(3px); opacity: 0.3; }
+
+  .shuffler-section .card-type {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+  }
+
+  .card-type.world-type { color: var(--green); }
+  .card-type.who-type { color: var(--pink); }
+  .card-type.wild-type { color: var(--blue); }
+
+  .card-text {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--text);
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .card-number {
+    font-size: 0.6rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    text-align: right;
+    letter-spacing: 0.05em;
+  }
+
+  /* Shuffle Face */
+  .shuffle-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    backface-visibility: hidden;
+    z-index: 5;
+  }
+
+  .shuffle-face.world-shuffle { border-top: 3px solid var(--green); }
+  .shuffle-face.who-shuffle { border-top: 3px solid var(--pink); }
+  .shuffle-face.wild-shuffle { border-top: 3px solid var(--blue); }
+
+  .shuffle-text {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--text);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    opacity: 0.35;
+  }
+
+  .card-container.shuffling .shuffle-face { display: flex; }
+
+  /* Tick flash */
+  .tick-ring {
+    position: absolute;
+    inset: -3px;
+    border-radius: 14px;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  @keyframes tickFlash {
+    0% { opacity: 0.6; }
+    100% { opacity: 0; }
+  }
+
+  .tick-ring.flash { animation: tickFlash 0.12s ease-out forwards; }
+  .tick-ring.world-tick { border: 1.5px solid var(--green); }
+  .tick-ring.who-tick { border: 1.5px solid var(--pink); }
+  .tick-ring.wild-tick { border: 1.5px solid var(--blue); }
+
+  /* Reveal */
+  @keyframes revealCard {
+    0% { transform: rotateX(6deg) scale(0.97); opacity: 0.6; }
+    50% { transform: rotateX(-1deg) scale(1.01); }
+    100% { transform: rotateX(0deg) scale(1); opacity: 1; }
+  }
+
+  .card-container.revealed .card-front { animation: revealCard 0.4s ease-out forwards; }
+  .card-container.revealed .card-back,
+  .card-container.revealed .shuffle-face { display: none; }
+  .card-container.revealed .card-front { transform: none; position: relative; }
+
+  /* Idle float */
+  .card-slot.idle .card-container { animation: idleFloat 5s ease-in-out infinite; }
+  .card-slot:nth-child(2).idle .card-container { animation-delay: 0.6s; }
+  .card-slot:nth-child(3).idle .card-container { animation-delay: 1.2s; }
+
+  @keyframes idleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  /* Shuffler controls */
+  .shuffler-controls {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 1rem;
+  }
+
+  .draw-btn {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 14px 44px;
+    border: 1.5px solid var(--green);
+    background: var(--green);
+    color: #0C0C14;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  .draw-btn::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 8px;
+    border: 1.5px solid var(--pink);
+    transform: translate(-2px, -1.5px);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+
+  .draw-btn::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 8px;
+    border: 1.5px solid var(--blue);
+    transform: translate(2px, 1.5px);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+
+  .draw-btn:hover:not(:disabled)::before,
+  .draw-btn:hover:not(:disabled)::after { opacity: 0.5; }
+  .draw-btn:hover:not(:disabled) { transform: translateY(-1px); }
+  .draw-btn:active:not(:disabled) { transform: translateY(0); }
+  .draw-btn:disabled { opacity: 0.2; cursor: default; }
+
+  .reset-btn {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 14px 28px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .reset-btn:hover { border-color: var(--text-mid); color: var(--text); }
+
+  .shuffler-prompt {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--text-dim);
+    opacity: 0;
+    transition: opacity 0.6s;
+    margin-top: 1rem;
+  }
+
+  .shuffler-prompt.visible { opacity: 1; }
+
+  @media (max-width: 780px) {
+    .card-text, .shuffle-text { font-size: 1.05rem; }
+    .shuffler-stage { gap: 10px; }
+    .shuffler-section { padding: 2.5rem 1rem; }
+  }
+
+  @media (max-width: 560px) {
+    .card-text, .shuffle-text { font-size: 0.92rem; }
+    .shuffler-stage { gap: 8px; }
+    .card-front, .shuffle-face { padding: 16px; }
+    .shuffler-section { padding: 2rem 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="drift-title">
+    <span class="t-pink">DRIFT</span>
+    <span class="t-blue">DRIFT</span>
+    <span class="t-green">DRIFT</span>
+  </div>
+  <p class="subtitle">A speculative invention game for curious people</p>
+  <p class="tagline">Discover new worlds. Build things for them.</p>
+  <div class="scroll-hint">scroll to explore</div>
+</div>
+
+<!-- WHAT IS IT -->
+<section>
+  <h2>What is <span class="a-pink">this</span></h2>
+  <div class="premise-box">
+    <p>Reality has drifted. Something shifted and now the world works differently. Your job? Figure out what's different about it, who lives there, and then <strong>invent a digital thing</strong> its inhabitants desperately need. An app, a game, a tool, a toy — whatever feels right. Everyone throws in ideas, the group riffs until something clicks, and then you actually build a quick prototype together.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-value">3–12</div><div class="stat-label">Players</div></div>
+    <div class="stat"><div class="stat-value">~45m</div><div class="stat-label">Play time</div></div>
+    <div class="stat"><div class="stat-value">3</div><div class="stat-label">Card decks</div></div>
+    <div class="stat"><div class="stat-value">1</div><div class="stat-label">Artifact built</div></div>
+  </div>
+</section>
+
+<div class="divider"><div class="div-line"></div></div>
+
+<!-- CARDS -->
+<section>
+  <h2>The <span class="a-green">Cards</span></h2>
+  <p>Three decks. Each one adds a layer of creative constraint. The combinations are where it gets interesting.</p>
+
+  <!-- WORLD -->
+  <div class="deck-section">
+    <div class="deck-header">
+      <div class="deck-icon world-icon">W</div>
+      <div><div class="deck-title">World Cards</div><div class="deck-desc">What's different about this world?</div></div>
+    </div>
+    <div class="card-grid">
+      <div class="card world-card"><div class="card-label">World</div>Every conversation is recorded by default</div>
+      <div class="card world-card"><div class="card-label">World</div>Nobody owns anything — everything is rented</div>
+      <div class="card world-card"><div class="card-label">World</div>Your reputation score is public</div>
+      <div class="card world-card"><div class="card-label">World</div>The work week is 2 days long</div>
+      <div class="card world-card"><div class="card-label">World</div>Everyone is assigned a stranger to check in on</div>
+      <div class="card world-card"><div class="card-label">World</div>Cash doesn't exist — only favors and trades</div>
+      <div class="card world-card"><div class="card-label">World</div>You can't live in the same place for more than 3 years</div>
+      <div class="card world-card"><div class="card-label">World</div>Screen time is capped at 1 hour a day</div>
+      <div class="card world-card"><div class="card-label">World</div>Nobody knows their own age</div>
+      <div class="card world-card"><div class="card-label">World</div>All art is anonymous</div>
+      <div class="card world-card"><div class="card-label">World</div>There's no advertising anywhere</div>
+      <div class="card world-card"><div class="card-label">World</div>All decisions are made by lottery not election</div>
+    </div>
+  </div>
+
+  <!-- WHO -->
+  <div class="deck-section">
+    <div class="deck-header">
+      <div class="deck-icon who-icon">W</div>
+      <div><div class="deck-title">Who Cards</div><div class="deck-desc">Who needs your invention?</div></div>
+    </div>
+    <div class="card-grid">
+      <div class="card who-card"><div class="card-label">Who</div>Teenagers</div>
+      <div class="card who-card"><div class="card-label">Who</div>First-daters</div>
+      <div class="card who-card"><div class="card-label">Who</div>Long-distance friends</div>
+      <div class="card who-card"><div class="card-label">Who</div>Night shift workers</div>
+      <div class="card who-card"><div class="card-label">Who</div>Someone who just moved</div>
+      <div class="card who-card"><div class="card-label">Who</div>New parents</div>
+      <div class="card who-card"><div class="card-label">Who</div>A shopkeeper</div>
+      <div class="card who-card"><div class="card-label">Who</div>Solo travelers</div>
+      <div class="card who-card"><div class="card-label">Who</div>Someone training for something</div>
+      <div class="card who-card"><div class="card-label">Who</div>Neighbors</div>
+      <div class="card who-card"><div class="card-label">Who</div>A mail carrier</div>
+      <div class="card who-card"><div class="card-label">Who</div>Someone starting over</div>
+    </div>
+  </div>
+
+  <!-- WILD -->
+  <div class="deck-section">
+    <div class="deck-header">
+      <div class="deck-icon wild-icon">!</div>
+      <div><div class="deck-title">Wild Cards</div><div class="deck-desc">A constraint on what you build</div></div>
+    </div>
+    <div class="card-grid">
+      <div class="card wild-card"><div class="card-label">Wild</div>It lasts exactly 3 minutes</div>
+      <div class="card wild-card"><div class="card-label">Wild</div>No text allowed</div>
+      <div class="card wild-card"><div class="card-label">Wild</div>It has exactly one button</div>
+      <div class="card wild-card"><div class="card-label">Wild</div>It requires trust to use</div>
+      <div class="card wild-card"><div class="card-label">Wild</div>It runs on sound only</div>
+      <div class="card wild-card"><div class="card-label">Wild</div>It can't be used indoors</div>
+      <div class="card wild-card"><div class="card-label">Wild</div>It requires two people minimum</div>
+      <div class="card wild-card"><div class="card-label">Wild</div>You use it once a day</div>
+      <div class="card wild-card"><div class="card-label">Wild</div>It fits on one screen</div>
+      <div class="card wild-card"><div class="card-label">Wild</div>It involves a real-world object</div>
+      <div class="card wild-card"><div class="card-label">Wild</div>It has a beginning and an end</div>
+      <div class="card wild-card"><div class="card-label">Wild</div>It resets every 24 hours</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="div-line"></div></div>
+
+<!-- HOW TO PLAY -->
+<section>
+  <h2>How to <span class="a-blue">Play</span></h2>
+
+  <div class="round">
+    <div class="round-number r1">Round 1</div>
+    <h3>Discover the World</h3>
+    <span class="time-badge t1">5 minutes</span>
+    <p>Draw <strong>2 WORLD cards</strong> and read them aloud. The group votes on which world they want to explore — or mashes both together into something even more interesting.</p>
+    <p>This is everyone's shared reality for the rest of the game. Riff on it. What does breakfast look like here? What's on the news?</p>
+  </div>
+
+  <div class="round">
+    <div class="round-number r2">Round 2</div>
+    <h3>Invent</h3>
+    <span class="time-badge t2">10 minutes</span>
+    <p>Draw <strong>1 WHO card</strong> and <strong>1 WILD card</strong> for the whole group. These are everyone's shared constraints.</p>
+    <p>Now you need a digital thing — an app, a game, a tool, an experience, an unexpected toy — that your WHO desperately needs in this DRIFT world, following your WILD constraint.</p>
+    <p><strong>Everyone throws out ideas. Riff on each other's suggestions. Combine things. Argue. The idea doesn't belong to anyone — it belongs to the room.</strong></p>
+  </div>
+
+  <div class="round">
+    <div class="round-number r3">Round 3</div>
+    <h3>Shape It</h3>
+    <span class="time-badge t3">10 minutes</span>
+    <p>By now the group has landed on something — maybe it's two ideas mashed together, maybe someone said something dumb that turned out to be brilliant. Either way, this is where it gets a shape.</p>
+    <p><strong>Give it a name. Give it a one-line tagline. Sketch it out on a whiteboard or a napkin.</strong> Everyone has their two cents — that's the point. The best version of the idea is the one nobody could've come up with alone.</p>
+  </div>
+
+  <div class="round">
+    <div class="round-number r4">Round 4</div>
+    <h3>Build the Artifact</h3>
+    <span class="time-badge t4">20+ minutes</span>
+    <p>The idea the group shaped becomes the build project. Everyone collaborates to create a quick, scrappy digital prototype. This could be a clickable mockup, a tiny web page, a playable mini-game, a different interactive thing — whatever captures the spirit of the idea.</p>
+    <p><strong>It doesn't need to be polished. It needs to be real enough to show someone and make them go "wait, what is this?"</strong></p>
+  </div>
+</section>
+
+<div class="divider"><div class="div-line"></div></div>
+
+<!-- EXAMPLES -->
+<section>
+  <h2>Example <span class="a-blue">Round</span></h2>
+
+  <div class="example-box">
+    <div class="example-label">Sample Draw</div>
+    <div class="example-cards">
+      <div class="example-card eg">WORLD: You can't live in the same place for more than 3 years</div>
+      <div class="example-card ew">WHO: Long-distance friends</div>
+      <div class="example-card ec">WILD: It creates something you can send to someone</div>
+    </div>
+    <p class="example-pitch"><strong>"Anchor"</strong> — a tool for long-distance friends in a world where everyone has to relocate every 3 years. Every time you move, you and your friend each pin one memory to your shared map — a meal you had, a bench you sat on, a dumb photo. Over the years the map fills up with these little anchors across dozens of cities. You can print a physical copy for each other. The friendship has more geography than either person does.</p>
+  </div>
+</section>
+
+<div class="divider"><div class="div-line"></div></div>
+
+<!-- ARTIFACT MOCKUPS -->
+<div class="mockups-section">
+  <h2>What Gets <span class="a-green">Built</span></h2>
+  <p>Round 4 is where it gets real. Here are three examples of the kind of artifacts a group might walk away with.</p>
+
+  <div class="mockups-grid">
+
+    <!-- GAME: Blind Spot -->
+    <div class="mockup-item">
+      <div class="mockup-frame-wrap">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-size:0.5rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.15em;">Round 3 of 5</div>
+            <div style="display:flex; gap:3px;">
+              <div style="width:16px; height:3px; border-radius:2px; background:var(--pink);"></div>
+              <div style="width:16px; height:3px; border-radius:2px; background:var(--pink);"></div>
+              <div style="width:16px; height:3px; border-radius:2px; background:var(--pink); opacity:0.3;"></div>
+              <div style="width:16px; height:3px; border-radius:2px; background:var(--border);"></div>
+              <div style="width:16px; height:3px; border-radius:2px; background:var(--border);"></div>
+            </div>
+          </div>
+          <div style="font-size:0.78rem; font-weight:700; color:var(--text); margin-bottom:2px;">Your partner sees:</div>
+          <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:14px; flex:1; display:flex; align-items:center; justify-content:center; margin:6px 0;">
+            <div style="text-align:center;">
+              <div style="font-size:1.8rem; font-weight:700; color:var(--pink); line-height:1;">a closed door</div>
+              <div style="font-size:0.55rem; color:var(--text-dim); margin-top:6px; text-transform:uppercase; letter-spacing:0.1em;">What's behind it?</div>
+            </div>
+          </div>
+          <div style="background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:8px 10px; margin-bottom:6px;">
+            <div style="font-size:0.5rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:4px;">Your answer</div>
+            <div style="font-size:0.65rem; color:var(--text-mid); border-bottom:1px solid var(--border); padding-bottom:4px;">Type what you think they see...</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <div class="mu-btn mu-btn-pink" style="flex:1; text-align:center;">Submit</div>
+          </div>
+          <div style="display:flex; justify-content:center; gap:12px; margin-top:8px;">
+            <div style="text-align:center;"><div style="font-size:0.85rem; font-weight:700; color:var(--pink);">340</div><div style="font-size:0.45rem; color:var(--text-dim); text-transform:uppercase;">Your pts</div></div>
+            <div style="width:1px; background:var(--border);"></div>
+            <div style="text-align:center;"><div style="font-size:0.85rem; font-weight:700; color:var(--text-mid);">280</div><div style="font-size:0.45rem; color:var(--text-dim); text-transform:uppercase;">Partner</div></div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <div class="mockup-meta">
+        <div class="mockup-type mt-game">Mobile Game</div>
+        <div class="mockup-name">Blind Spot</div>
+        <div class="mockup-tagline">You can only see what the other person sees. Guess what's in your own blind spot.</div>
+      </div>
+    </div>
+
+    <!-- WEB APP: Shed Day -->
+    <div class="mockup-item">
+      <div class="mockup-frame-wrap">
+      <div class="browser-frame">
+        <div class="browser-bar">
+          <div class="browser-dots"><span></span><span></span><span></span></div>
+          <div class="browser-url">shedday.app/dashboard</div>
+        </div>
+        <div class="browser-screen">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div>
+              <div style="font-size:0.8rem; font-weight:700; color:var(--text);">Shed Day</div>
+              <div style="font-size:0.5rem; color:var(--text-dim);">Move #4 — 12 days away</div>
+            </div>
+            <div class="mu-pill" style="background:rgba(62,199,139,0.12); color:var(--green);">47 items left</div>
+          </div>
+          <div class="mu-progress-bar" style="margin-bottom:10px;"><div class="mu-progress-fill" style="width:62%; background:var(--green);"></div></div>
+          <div style="display:flex; gap:6px; margin-bottom:8px;">
+            <div style="flex:1; text-align:center; padding:5px; border-radius:5px; background:rgba(232,69,122,0.08); border:1px solid rgba(232,69,122,0.15);"><div style="font-size:0.75rem; font-weight:700; color:var(--pink);">31</div><div style="font-size:0.45rem; color:var(--text-dim); text-transform:uppercase;">Shed</div></div>
+            <div style="flex:1; text-align:center; padding:5px; border-radius:5px; background:rgba(62,199,139,0.08); border:1px solid rgba(62,199,139,0.15);"><div style="font-size:0.75rem; font-weight:700; color:var(--green);">16</div><div style="font-size:0.45rem; color:var(--text-dim); text-transform:uppercase;">Kept</div></div>
+            <div style="flex:1; text-align:center; padding:5px; border-radius:5px; background:rgba(59,129,245,0.08); border:1px solid rgba(59,129,245,0.15);"><div style="font-size:0.75rem; font-weight:700; color:var(--blue);">47</div><div style="font-size:0.45rem; color:var(--text-dim); text-transform:uppercase;">Left</div></div>
+          </div>
+          <div style="font-size:0.5rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:5px;">Next up to review</div>
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <div class="mu-card" style="display:flex; align-items:center; gap:8px;">
+              <div style="width:22px; height:22px; border-radius:5px; background:rgba(232,69,122,0.12); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><div style="width:8px; height:8px; border-radius:2px; background:var(--pink); opacity:0.6;"></div></div>
+              <div style="flex:1; min-width:0;"><div style="font-size:0.6rem; font-weight:600; color:var(--text);">Bookmark — best laundromat</div><div style="font-size:0.48rem; color:var(--text-dim);">Place — saved 14 months ago</div></div>
+              <div style="font-size:0.45rem; color:var(--pink); font-weight:600;">SHED</div>
+            </div>
+            <div class="mu-card" style="display:flex; align-items:center; gap:8px;">
+              <div style="width:22px; height:22px; border-radius:5px; background:rgba(62,199,139,0.12); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><div style="width:8px; height:8px; border-radius:2px; background:var(--green); opacity:0.6;"></div></div>
+              <div style="flex:1; min-width:0;"><div style="font-size:0.6rem; font-weight:600; color:var(--text);">Playlist — rainy mornings on 5th</div><div style="font-size:0.48rem; color:var(--text-dim);">Memory — created 2 years ago</div></div>
+              <div style="font-size:0.45rem; color:var(--green); font-weight:600;">KEEP</div>
+            </div>
+            <div class="mu-card" style="display:flex; align-items:center; gap:8px;">
+              <div style="width:22px; height:22px; border-radius:5px; background:rgba(59,129,245,0.12); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><div style="width:8px; height:8px; border-radius:2px; background:var(--blue); opacity:0.6;"></div></div>
+              <div style="flex:1; min-width:0;"><div style="font-size:0.6rem; font-weight:600; color:var(--text);">Contact — old landlord</div><div style="font-size:0.48rem; color:var(--text-dim);">Connection — last used 8 months ago</div></div>
+              <div class="mu-btn mu-btn-ghost" style="font-size:0.4rem; padding:3px 8px;">Review</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <div class="mockup-meta">
+        <div class="mockup-type mt-webapp">Web App</div>
+        <div class="mockup-name">Shed Day</div>
+        <div class="mockup-tagline">Every move comes with baggage. This helps you leave it behind before you go.</div>
+      </div>
+    </div>
+
+    <!-- DESKTOP: Murmur -->
+    <div class="mockup-item">
+      <div class="mockup-frame-wrap">
+      <div class="desktop-frame">
+        <div class="desktop-titlebar">
+          <div class="browser-dots"><span></span><span></span><span></span></div>
+          <div class="desktop-titlebar-text">Murmur</div>
+          <div style="width:30px;"></div>
+        </div>
+        <div class="desktop-screen">
+          <div style="display:flex; gap:10px; flex:1; min-height:0;">
+            <!-- sidebar -->
+            <div style="width:35%; display:flex; flex-direction:column; gap:4px;">
+              <div style="font-size:0.5rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:4px;">Today's murmurs</div>
+              <div class="mu-card" style="border-left:2px solid var(--blue); padding:6px 8px;">
+                <div style="font-size:0.55rem; font-weight:500; color:var(--text); line-height:1.35;">I left my window open all night and woke up feeling like a new person</div>
+                <div style="font-size:0.42rem; color:var(--text-dim); margin-top:3px;">3 hours ago — Block 7</div>
+              </div>
+              <div class="mu-card" style="border-left:2px solid var(--pink); padding:6px 8px; opacity:0.6;">
+                <div style="font-size:0.55rem; font-weight:500; color:var(--text); line-height:1.35;">Does anyone else talk to their plants or is that just me</div>
+                <div style="font-size:0.42rem; color:var(--text-dim); margin-top:3px;">7 hours ago — Block 12</div>
+              </div>
+              <div class="mu-card" style="border-left:2px solid var(--green); padding:6px 8px; opacity:0.4;">
+                <div style="font-size:0.55rem; font-weight:500; color:var(--text); line-height:1.35;">The best part of Tuesday is knowing it's almost not Tuesday</div>
+                <div style="font-size:0.42rem; color:var(--text-dim); margin-top:3px;">11 hours ago — Block 3</div>
+              </div>
+            </div>
+            <!-- main -->
+            <div style="flex:1; display:flex; flex-direction:column;">
+              <div style="flex:1; display:flex; align-items:center; justify-content:center; background:var(--surface); border-radius:8px; border:1px solid var(--border); margin-bottom:8px;">
+                <div style="text-align:center; padding:14px;">
+                  <div style="font-size:0.42rem; color:var(--blue); text-transform:uppercase; letter-spacing:0.15em; font-weight:600; margin-bottom:8px;">Your daily murmur</div>
+                  <div style="font-size:0.85rem; font-weight:600; color:var(--text); line-height:1.4; max-width:180px; margin:0 auto;">I left my window open all night and woke up feeling like a new person</div>
+                  <div style="font-size:0.42rem; color:var(--text-dim); margin-top:8px;">Anonymous — Block 7</div>
+                  <div style="display:flex; justify-content:center; gap:6px; margin-top:10px;">
+                    <div class="mu-btn mu-btn-ghost" style="font-size:0.42rem; padding:3px 10px;">Felt this</div>
+                    <div class="mu-btn mu-btn-ghost" style="font-size:0.42rem; padding:3px 10px;">Pass</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <div style="flex:1; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:6px 8px; display:flex; align-items:center; gap:6px;">
+                  <div style="font-size:0.5rem; color:var(--text-dim);">Write your anonymous murmur...</div>
+                </div>
+                <div class="mu-btn mu-btn-blue" style="font-size:0.45rem; padding:6px 10px;">Send</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <div class="mockup-meta">
+        <div class="mockup-type mt-desktop">Desktop Experience</div>
+        <div class="mockup-name">Murmur</div>
+        <div class="mockup-tagline">One anonymous message a day from someone nearby. You never find out who.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="divider"><div class="div-line"></div></div>
+
+<!-- TRY IT -->
+<section>
+  <div class="shuffler-section">
+    <h2 style="margin-bottom: 0.5rem;">Try a <span class="a-pink">Draw</span></h2>
+    <p style="margin-bottom: 0.5rem;">Hit the button. See what world you land in.</p>
+
+    <div class="shuffler-stage" id="card-stage">
+      <!-- WORLD -->
+      <div class="card-slot idle" id="slot-world">
+        <div class="card-container" id="container-world">
+          <div class="card-face card-back world-back">
+            <div class="card-back-inner"><div class="back-line"></div><div class="card-back-label">World</div></div>
+          </div>
+          <div class="shuffle-face world-shuffle" id="shuffle-world">
+            <div class="card-type world-type">World</div>
+            <div class="shuffle-text" id="shuffle-text-world"></div>
+          </div>
+          <div class="card-face card-front world-front" id="front-world">
+            <div class="card-type world-type">World</div>
+            <div class="card-text" id="text-world"></div>
+            <div class="card-number" id="num-world"></div>
+          </div>
+          <div class="tick-ring world-tick" id="tick-world"></div>
+        </div>
+      </div>
+
+      <!-- WHO -->
+      <div class="card-slot idle" id="slot-who">
+        <div class="card-container" id="container-who">
+          <div class="card-face card-back who-back">
+            <div class="card-back-inner"><div class="back-line"></div><div class="card-back-label">Who</div></div>
+          </div>
+          <div class="shuffle-face who-shuffle" id="shuffle-who">
+            <div class="card-type who-type">Who</div>
+            <div class="shuffle-text" id="shuffle-text-who"></div>
+          </div>
+          <div class="card-face card-front who-front" id="front-who">
+            <div class="card-type who-type">Who</div>
+            <div class="card-text" id="text-who"></div>
+            <div class="card-number" id="num-who"></div>
+          </div>
+          <div class="tick-ring who-tick" id="tick-who"></div>
+        </div>
+      </div>
+
+      <!-- WILD -->
+      <div class="card-slot idle" id="slot-wild">
+        <div class="card-container" id="container-wild">
+          <div class="card-face card-back wild-back">
+            <div class="card-back-inner"><div class="back-line"></div><div class="card-back-label">Wild</div></div>
+          </div>
+          <div class="shuffle-face wild-shuffle" id="shuffle-wild">
+            <div class="card-type wild-type">Wild</div>
+            <div class="shuffle-text" id="shuffle-text-wild"></div>
+          </div>
+          <div class="card-face card-front wild-front" id="front-wild">
+            <div class="card-type wild-type">Wild</div>
+            <div class="card-text" id="text-wild"></div>
+            <div class="card-number" id="num-wild"></div>
+          </div>
+          <div class="tick-ring wild-tick" id="tick-wild"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="shuffler-prompt" id="shuffler-prompt">Now... what would you build?</div>
+
+    <div class="shuffler-controls">
+      <button class="draw-btn" id="draw-btn" onclick="draw()">Draw Cards</button>
+      <button class="reset-btn" onclick="resetAll()">Reset</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="div-line"></div></div>
+
+<!-- TIPS -->
+<section>
+  <h2>Facilitator <span class="a-blue">Tips</span></h2>
+  <p>A few things that make this game sing.</p>
+  <div class="tips-grid">
+    <div class="tip"><div class="tip-title">Embrace the dumb ideas</div><p>The sillier the idea, the more fun the build. Don't optimize for "good" — optimize for "I can't believe we're making this."</p></div>
+    <div class="tip"><div class="tip-title">Time pressure is your friend</div><p>10 minutes to invent forces gut instincts over overthinking. Play music. Keep it moving.</p></div>
+    <div class="tip"><div class="tip-title">Build ugly, build fast</div><p>The artifact doesn't need to be polished. A napkin-sketch prototype that captures the vibe beats a perfect mockup every time.</p></div>
+    <div class="tip"><div class="tip-title">Remix the decks</div><p>Add your own cards. Inside jokes, industry-specific weirdness, things your team is obsessed with. The game gets better when it's yours.</p></div>
+    <div class="tip"><div class="tip-title">Scale it up or down</div><p>3 people works. 12 people works. The conversation just changes shape. Bigger groups get louder and wilder — that's a feature, not a bug.</p></div>
+    <div class="tip"><div class="tip-title">The build is the point</div><p>Rounds 1-3 are the warmup. Round 4 is where it gets real. Give it space. Let people surprise themselves.</p></div>
+  </div>
+</section>
+
+<div class="divider"><div class="div-line"></div></div>
+
+<!-- LINEAGE -->
+<section>
+  <h2>Design <span class="a-green">Lineage</span></h2>
+  <p>DRIFT borrows shamelessly from the best. The combinatorial card mechanic comes from <strong>The Thing From The Future</strong> (Situation Lab), which proved that random constraints across multiple categories create millions of surprising prompts. The emphasis on playful ambiguity is borrowed from <strong>Dixit</strong>, where open interpretation is the whole game. The lateral-thinking curveball (WILD cards) takes a page from Brian Eno's <strong>Oblique Strategies</strong>. And the "discover, invent, build" arc draws on <strong>speculative design workshop</strong> practice, where imagining a world and then making artifacts from it is how futures become tangible.</p>
+  <p>The difference? DRIFT is designed to end with something real. Not just a description or a sketch, but a working (if scrappy) digital thing that didn't exist before the game started.</p>
+</section>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-logo">
+    <span class="f-pink">DRIFT</span>
+    <span class="f-blue">DRIFT</span>
+    <span class="f-green">DRIFT</span>
+  </div>
+  <p>A speculative invention game for the curious</p>
+</div>
+
+<script>
+const worldCards=["Nobody can lie","Every conversation is recorded by default","Nobody owns anything — everything is rented","Your reputation score is public","The work week is 2 days long","Everyone is assigned a stranger to check in on","You can only eat what you grow","Sleep is rationed to 4 hours a night","Children design the school curriculum","Everyone must change careers every 5 years","Cash doesn't exist — only favors and trades","You can't live in the same place for more than 3 years","All meetings are limited to 10 minutes","Nobody knows their own age","Your health data is completely public","There are no locks on any doors","Everyone gets a universal basic income but it's generous","All decisions are made by lottery not election","Screen time is capped at 1 hour a day","There are no restaurants — all meals are communal","Retirement doesn't exist — you work forever but less","You can't say no to a favor","Everyone wears the same thing","Every neighborhood rotates residents annually","The news only reports good things","There's no internet — just local networks per town","Everyone must teach one class a year","Cars don't exist — everything is walking distance","There's no advertising anywhere","Everyone's daily mood is visible to others","Silence in public is enforced by social norm","Every person gets one anonymous message a day they must send","Companies can only have 15 employees max","There's no such thing as private property outdoors","You're assigned a new name every decade","Nobody works after dark","All art is anonymous","Marriage has a 10-year term limit with option to renew","Trust is earned through a public point system","There's a mandatory year of travel at age 20","No one can own more than they can carry","Strangers greet each other with a personal truth","Your daily schedule is partially set by the community","There are no prisons — only mandatory community service","Every building must include a public space","You must spend one month a year in complete solitude","You can only own things you made yourself","Nobody has a last name","The oldest person in town makes the final call on disputes","You can only communicate in writing after 9pm"];
+const whoCards=["Teenagers","First-daters","Long-distance friends","Night shift workers","Someone who just moved","Street artists","Grandparents","New parents","A shopkeeper","Solo travelers","Someone starting over","Neighbors","Roommates","Someone in a waiting room","Someone who commutes far","The new person at work","Siblings","A barista","Someone training for something","A retiree","Someone who hosts a lot","A long-term couple","Old friends reconnecting","A taxi driver","Someone who works from home","A street vendor","Regulars at a bar","A volunteer","A small business owner","Someone who just retired","A farmer","A wedding planner","Someone learning to cook","A bus driver","Someone who stays late","A mechanic","Someone between jobs","A librarian","A mail carrier","A night owl","A night security guard","A dog walker","Coworkers","A crossing guard","A nurse","Someone living alone","A coach","A translator","Someone who walks everywhere","A caretaker"];
+const wildCards=["It lasts exactly 3 minutes","No text allowed","It has exactly one button","It requires trust to use","It runs on sound only","It can't be used indoors","It requires two people minimum","You use it once a day","It uses the camera","It fits on one screen","It involves a real-world object","It has a beginning and an end","It changes based on who's nearby","It involves drawing","It creates something you can send to someone","It uses location","It only works once a week","It involves a countdown","It produces a different result every time","It removes something instead of adding something","It involves trading","It has a time limit","It must involve food","It only works at night","It can't be used alone","It involves a daily routine","It requires your voice","It outputs something physical","It has no interface — just a notification","It takes exactly 30 seconds","It only stores one thing at a time","It uses weather data","It requires a decision","It connects two people who don't know each other","It works through a question","It has no save function","It can only be used in one place","It involves waiting","It resets every 24 hours","It needs your hands","It uses a timer","It's limited to 5 words or less","It involves collecting","It can only hold one message","It works differently each season","It takes an input from your body","It must be shared to work","It only works during a commute","It involves a map","It disappears after one use"];
+
+let isDrawing = false;
+let drawCount = 0;
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+async function draw() {
+  if (isDrawing) return;
+  isDrawing = true;
+  drawCount++;
+
+  document.getElementById('draw-btn').disabled = true;
+  document.getElementById('shuffler-prompt').classList.remove('visible');
+
+  ['world', 'who', 'wild'].forEach(type => {
+    const slot = document.getElementById(`slot-${type}`);
+    const container = document.getElementById(`container-${type}`);
+    slot.classList.remove('idle');
+    container.classList.remove('revealed', 'shuffling');
+    container.querySelector('.card-back').style.display = '';
+    container.querySelector('.shuffle-face').style.display = '';
+    container.querySelector('.card-front').style.transform = 'rotateY(180deg)';
+    container.querySelector('.card-front').style.position = 'absolute';
+  });
+
+  const finalWorld = pick(worldCards);
+  const finalWho = pick(whoCards);
+  const finalWild = pick(wildCards);
+
+  await animateCard('world', worldCards, finalWorld, worldCards.indexOf(finalWorld) + 1);
+  await delay(400);
+  await animateCard('who', whoCards, finalWho, whoCards.indexOf(finalWho) + 1);
+  await delay(400);
+  await animateCard('wild', wildCards, finalWild, wildCards.indexOf(finalWild) + 1);
+
+  await delay(600);
+  document.getElementById('shuffler-prompt').classList.add('visible');
+  document.getElementById('draw-btn').disabled = false;
+  isDrawing = false;
+}
+
+async function animateCard(type, deck, finalCard, cardNum) {
+  const container = document.getElementById(`container-${type}`);
+  const shuffleText = document.getElementById(`shuffle-text-${type}`);
+  const tick = document.getElementById(`tick-${type}`);
+
+  container.querySelector('.card-back').style.display = 'none';
+  container.classList.add('shuffling');
+
+  const shuffled = shuffle(deck);
+  const totalTicks = 14;
+
+  for (let i = 0; i < totalTicks; i++) {
+    const candidate = i === totalTicks - 1 ? finalCard : shuffled[i % shuffled.length];
+    shuffleText.textContent = candidate;
+
+    tick.classList.remove('flash');
+    void tick.offsetWidth;
+    tick.classList.add('flash');
+
+    const progress = i / totalTicks;
+    const speed = 55 + (progress * progress * 320);
+    await delay(speed);
+  }
+
+  container.classList.remove('shuffling');
+  container.classList.add('revealed');
+  document.getElementById(`text-${type}`).textContent = finalCard;
+  document.getElementById(`num-${type}`).textContent = `${cardNum} / ${deck.length}`;
+  tick.classList.remove('flash');
+}
+
+function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+function resetAll() {
+  isDrawing = false;
+  document.getElementById('shuffler-prompt').classList.remove('visible');
+
+  ['world', 'who', 'wild'].forEach(type => {
+    const slot = document.getElementById(`slot-${type}`);
+    const container = document.getElementById(`container-${type}`);
+    slot.classList.add('idle');
+    container.classList.remove('revealed', 'shuffling');
+    container.querySelector('.card-back').style.display = '';
+    container.querySelector('.shuffle-face').style.display = '';
+    container.querySelector('.card-front').style.transform = 'rotateY(180deg)';
+    container.querySelector('.card-front').style.position = 'absolute';
+  });
+}
+</script>
+</body>
+</html>
