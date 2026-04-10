@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRIFT — World Cards</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --pink: #E8457A;
+    --blue: #3B81F5;
+    --green: #3EC78B;
+    --bg: #0C0C14;
+    --surface: #1C1C28;
+    --border: #363648;
+    --text: #EDEDF4;
+    --text-mid: #9A9AB2;
+    --text-dim: #6E6E86;
+  }
+
+  body {
+    font-family: 'Instrument Sans', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* === HEADER === */
+  .page-header {
+    text-align: center;
+    padding: 3rem 2rem 1rem;
+  }
+
+  .mini-logo {
+    position: relative;
+    display: inline-block;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+
+  .mini-logo .t-green { color: var(--bg); opacity: 0.8; }
+  .mini-logo .t-pink { position: absolute; top: -1px; left: -2px; color: var(--pink); opacity: 0.4; z-index: 1; }
+  .mini-logo .t-blue { position: absolute; top: 1px; left: 2px; color: var(--blue); opacity: 0.3; z-index: 2; }
+
+  .page-title {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .page-title .a-green { color: var(--green); }
+
+  .page-subtitle {
+    font-size: 1rem;
+    color: var(--text-mid);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* === SHUFFLER === */
+  .shuffler-section {
+    width: 100%;
+    max-width: 640px;
+    padding: 2rem 1.5rem;
+    flex: 1;
+  }
+
+  .shuffler-stage {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 0;
+    margin: 1.5rem 0;
+  }
+
+  .card-slot {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 260px;
+    aspect-ratio: 5 / 7;
+    perspective: 900px;
+  }
+
+  .card-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+  }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Card Back */
+  .card-back {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-back-inner {
+    width: 82%;
+    height: 74%;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .card-back-inner::before,
+  .card-back-inner::after,
+  .card-back-inner .back-line {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid;
+    border-radius: 8px;
+  }
+
+  .world-back .card-back-inner::before { border-color: var(--green); opacity: 0.15; }
+  .world-back .card-back-inner::after { border-color: var(--pink); opacity: 0.12; transform: translate(-2px, -2px); }
+  .world-back .card-back-inner .back-line { border-color: var(--blue); opacity: 0.1; transform: translate(2px, 2px); }
+
+  .card-back-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    z-index: 2;
+  }
+
+  /* Card Front */
+  .card-front {
+    transform: rotateY(180deg);
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+  }
+
+  .card-front.world-front { border-top: 3px solid var(--green); }
+
+  .card-front::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 0; right: 0;
+    height: 3px;
+  }
+
+  .card-front.world-front::before { background: var(--pink); transform: translateX(-3px); opacity: 0.4; }
+  .card-front.world-front::after { content: ''; position: absolute; top: -3px; left: 0; right: 0; height: 3px; background: var(--blue); transform: translateX(3px); opacity: 0.3; }
+
+  .card-type {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+  }
+
+  .card-type.world-type { color: var(--green); }
+
+  .card-text {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--text);
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .card-number {
+    font-size: 0.6rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    text-align: right;
+    letter-spacing: 0.05em;
+  }
+
+  /* Shuffle Face */
+  .shuffle-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    backface-visibility: hidden;
+    z-index: 5;
+  }
+
+  .shuffle-face.world-shuffle { border-top: 3px solid var(--green); }
+
+  .shuffle-text {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--text);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    opacity: 0.35;
+  }
+
+  .card-container.shuffling .shuffle-face { display: flex; }
+
+  /* Tick flash */
+  .tick-ring {
+    position: absolute;
+    inset: -3px;
+    border-radius: 14px;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  @keyframes tickFlash {
+    0% { opacity: 0.6; }
+    100% { opacity: 0; }
+  }
+
+  .tick-ring.flash { animation: tickFlash 0.12s ease-out forwards; }
+  .tick-ring.world-tick { border: 1.5px solid var(--green); }
+
+  /* Reveal */
+  @keyframes revealCard {
+    0% { transform: rotateX(6deg) scale(0.97); opacity: 0.6; }
+    50% { transform: rotateX(-1deg) scale(1.01); }
+    100% { transform: rotateX(0deg) scale(1); opacity: 1; }
+  }
+
+  .card-container.revealed .card-front { animation: revealCard 0.4s ease-out forwards; }
+  .card-container.revealed .card-back,
+  .card-container.revealed .shuffle-face { display: none; }
+  .card-container.revealed .card-front { transform: none; position: relative; }
+
+  /* Idle float */
+  .card-slot.idle .card-container { animation: idleFloat 5s ease-in-out infinite; }
+  .card-slot:nth-child(2).idle .card-container { animation-delay: 0.6s; }
+
+  @keyframes idleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  /* Controls */
+  .shuffler-controls {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 1rem;
+  }
+
+  .draw-btn {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 14px 44px;
+    border: 1.5px solid var(--green);
+    background: var(--green);
+    color: #0C0C14;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  .draw-btn::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 8px;
+    border: 1.5px solid var(--pink);
+    transform: translate(-2px, -1.5px);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+
+  .draw-btn::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 8px;
+    border: 1.5px solid var(--blue);
+    transform: translate(2px, 1.5px);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+
+  .draw-btn:hover:not(:disabled)::before,
+  .draw-btn:hover:not(:disabled)::after { opacity: 0.5; }
+  .draw-btn:hover:not(:disabled) { transform: translateY(-1px); }
+  .draw-btn:active:not(:disabled) { transform: translateY(0); }
+  .draw-btn:disabled { opacity: 0.2; cursor: default; }
+
+  .reset-btn {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 14px 28px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .reset-btn:hover { border-color: var(--text-mid); color: var(--text); }
+
+  .shuffler-prompt {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 1.1rem;
+    color: var(--green);
+    opacity: 0;
+    transition: opacity 0.6s;
+    margin-top: 1.5rem;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .shuffler-prompt.visible { opacity: 1; }
+
+  /* === BACK LINK === */
+  .back-link {
+    text-align: center;
+    padding: 2rem 2rem 3rem;
+  }
+
+  .back-link a {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .back-link a:hover { color: var(--text); }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 560px) {
+    .card-text, .shuffle-text { font-size: 0.95rem; }
+    .shuffler-stage { gap: 10px; }
+    .card-front, .shuffle-face { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div class="mini-logo">
+    <span class="t-pink">DRIFT</span>
+    <span class="t-blue">DRIFT</span>
+    <span class="t-green">DRIFT</span>
+  </div>
+  <h1 class="page-title">Discover Your <span class="a-green">World</span></h1>
+  <p class="page-subtitle">Draw 2 World cards. Vote on which one to explore — or combine them.</p>
+</div>
+
+<!-- SHUFFLER -->
+<div class="shuffler-section">
+  <div class="shuffler-stage" id="card-stage">
+
+    <!-- WORLD 1 -->
+    <div class="card-slot idle" id="slot-world1">
+      <div class="card-container" id="container-world1">
+        <div class="card-face card-back world-back">
+          <div class="card-back-inner"><div class="back-line"></div><div class="card-back-label">World</div></div>
+        </div>
+        <div class="shuffle-face world-shuffle" id="shuffle-world1">
+          <div class="card-type world-type">World</div>
+          <div class="shuffle-text" id="shuffle-text-world1"></div>
+        </div>
+        <div class="card-face card-front world-front" id="front-world1">
+          <div class="card-type world-type">World</div>
+          <div class="card-text" id="text-world1"></div>
+          <div class="card-number" id="num-world1"></div>
+        </div>
+        <div class="tick-ring world-tick" id="tick-world1"></div>
+      </div>
+    </div>
+
+    <!-- WORLD 2 -->
+    <div class="card-slot idle" id="slot-world2">
+      <div class="card-container" id="container-world2">
+        <div class="card-face card-back world-back">
+          <div class="card-back-inner"><div class="back-line"></div><div class="card-back-label">World</div></div>
+        </div>
+        <div class="shuffle-face world-shuffle" id="shuffle-world2">
+          <div class="card-type world-type">World</div>
+          <div class="shuffle-text" id="shuffle-text-world2"></div>
+        </div>
+        <div class="card-face card-front world-front" id="front-world2">
+          <div class="card-type world-type">World</div>
+          <div class="card-text" id="text-world2"></div>
+          <div class="card-number" id="num-world2"></div>
+        </div>
+        <div class="tick-ring world-tick" id="tick-world2"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="shuffler-prompt" id="shuffler-prompt">Which world will you explore?</div>
+
+  <div class="shuffler-controls">
+    <button class="draw-btn" id="draw-btn" onclick="draw()">Draw World Cards</button>
+    <button class="reset-btn" onclick="resetAll()">Reset</button>
+  </div>
+</div>
+
+<!-- BACK -->
+<div class="back-link">
+  <a href="play.html">&larr; Back to How to Play</a>
+</div>
+
+<script>
+const worldCards=["Nobody can lie","Every conversation is recorded by default","Nobody owns anything — everything is rented","Your reputation score is public","The work week is 2 days long","Everyone is assigned a stranger to check in on","You can only eat what you grow","Sleep is rationed to 4 hours a night","Children design the school curriculum","Everyone must change careers every 5 years","Cash doesn't exist — only favors and trades","You can't live in the same place for more than 3 years","All meetings are limited to 10 minutes","Nobody knows their own age","Your health data is completely public","There are no locks on any doors","Everyone gets a universal basic income but it's generous","All decisions are made by lottery not election","Screen time is capped at 1 hour a day","There are no restaurants — all meals are communal","Retirement doesn't exist — you work forever but less","You can't say no to a favor","Everyone wears the same thing","Every neighborhood rotates residents annually","The news only reports good things","There's no internet — just local networks per town","Everyone must teach one class a year","Cars don't exist — everything is walking distance","There's no advertising anywhere","Everyone's daily mood is visible to others","Silence in public is enforced by social norm","Every person gets one anonymous message a day they must send","Companies can only have 15 employees max","There's no such thing as private property outdoors","You're assigned a new name every decade","Nobody works after dark","All art is anonymous","Marriage has a 10-year term limit with option to renew","Trust is earned through a public point system","There's a mandatory year of travel at age 20","No one can own more than they can carry","Strangers greet each other with a personal truth","Your daily schedule is partially set by the community","There are no prisons — only mandatory community service","Every building must include a public space","You must spend one month a year in complete solitude","You can only own things you made yourself","Nobody has a last name","The oldest person in town makes the final call on disputes","You can only communicate in writing after 9pm"];
+
+let isDrawing = false;
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+async function draw() {
+  if (isDrawing) return;
+  isDrawing = true;
+
+  document.getElementById('draw-btn').disabled = true;
+  document.getElementById('shuffler-prompt').classList.remove('visible');
+
+  ['world1', 'world2'].forEach(id => {
+    const slot = document.getElementById(`slot-${id}`);
+    const container = document.getElementById(`container-${id}`);
+    slot.classList.remove('idle');
+    container.classList.remove('revealed', 'shuffling');
+    container.querySelector('.card-back').style.display = '';
+    container.querySelector('.shuffle-face').style.display = '';
+    container.querySelector('.card-front').style.transform = 'rotateY(180deg)';
+    container.querySelector('.card-front').style.position = 'absolute';
+  });
+
+  // Pick two different cards
+  const shuffled = shuffle(worldCards);
+  const final1 = shuffled[0];
+  const final2 = shuffled[1];
+
+  await animateCard('world1', worldCards, final1, worldCards.indexOf(final1) + 1);
+  await delay(500);
+  await animateCard('world2', worldCards, final2, worldCards.indexOf(final2) + 1);
+
+  await delay(600);
+  document.getElementById('shuffler-prompt').classList.add('visible');
+  document.getElementById('draw-btn').disabled = false;
+  isDrawing = false;
+}
+
+async function animateCard(id, deck, finalCard, cardNum) {
+  const container = document.getElementById(`container-${id}`);
+  const shuffleText = document.getElementById(`shuffle-text-${id}`);
+  const tick = document.getElementById(`tick-${id}`);
+
+  container.querySelector('.card-back').style.display = 'none';
+  container.classList.add('shuffling');
+
+  const shuffled = shuffle(deck);
+  const totalTicks = 14;
+
+  for (let i = 0; i < totalTicks; i++) {
+    const candidate = i === totalTicks - 1 ? finalCard : shuffled[i % shuffled.length];
+    shuffleText.textContent = candidate;
+
+    tick.classList.remove('flash');
+    void tick.offsetWidth;
+    tick.classList.add('flash');
+
+    const progress = i / totalTicks;
+    const speed = 55 + (progress * progress * 320);
+    await delay(speed);
+  }
+
+  container.classList.remove('shuffling');
+  container.classList.add('revealed');
+  document.getElementById(`text-${id}`).textContent = finalCard;
+  document.getElementById(`num-${id}`).textContent = `${cardNum} / ${deck.length}`;
+  tick.classList.remove('flash');
+}
+
+function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+function resetAll() {
+  isDrawing = false;
+  document.getElementById('shuffler-prompt').classList.remove('visible');
+
+  ['world1', 'world2'].forEach(id => {
+    const slot = document.getElementById(`slot-${id}`);
+    const container = document.getElementById(`container-${id}`);
+    slot.classList.add('idle');
+    container.classList.remove('revealed', 'shuffling');
+    container.querySelector('.card-back').style.display = '';
+    container.querySelector('.shuffle-face').style.display = '';
+    container.querySelector('.card-front').style.transform = 'rotateY(180deg)';
+    container.querySelector('.card-front').style.position = 'absolute';
+  });
+}
+</script>
+</body>
+</html>

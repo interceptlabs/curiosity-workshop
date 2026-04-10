@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRIFT — Who + Wild Cards</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --pink: #E8457A;
+    --blue: #3B81F5;
+    --green: #3EC78B;
+    --bg: #0C0C14;
+    --surface: #1C1C28;
+    --border: #363648;
+    --text: #EDEDF4;
+    --text-mid: #9A9AB2;
+    --text-dim: #6E6E86;
+  }
+
+  body {
+    font-family: 'Instrument Sans', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* === HEADER === */
+  .page-header {
+    text-align: center;
+    padding: 3rem 2rem 1rem;
+  }
+
+  .mini-logo {
+    position: relative;
+    display: inline-block;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+
+  .mini-logo .t-green { color: var(--bg); opacity: 0.8; }
+  .mini-logo .t-pink { position: absolute; top: -1px; left: -2px; color: var(--pink); opacity: 0.4; z-index: 1; }
+  .mini-logo .t-blue { position: absolute; top: 1px; left: 2px; color: var(--blue); opacity: 0.3; z-index: 2; }
+
+  .page-title {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .page-title .a-pink { color: var(--pink); }
+  .page-title .a-blue { color: var(--blue); }
+
+  .page-subtitle {
+    font-size: 1rem;
+    color: var(--text-mid);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* === SHUFFLER === */
+  .shuffler-section {
+    width: 100%;
+    max-width: 640px;
+    padding: 2rem 1.5rem;
+    flex: 1;
+  }
+
+  .shuffler-stage {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 0;
+    margin: 1.5rem 0;
+  }
+
+  .card-slot {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 260px;
+    aspect-ratio: 5 / 7;
+    perspective: 900px;
+  }
+
+  .card-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+  }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Card Back */
+  .card-back {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-back-inner {
+    width: 82%;
+    height: 74%;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .card-back-inner::before,
+  .card-back-inner::after,
+  .card-back-inner .back-line {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid;
+    border-radius: 8px;
+  }
+
+  .who-back .card-back-inner::before { border-color: var(--pink); opacity: 0.15; }
+  .who-back .card-back-inner::after { border-color: var(--green); opacity: 0.12; transform: translate(-2px, -2px); }
+  .who-back .card-back-inner .back-line { border-color: var(--blue); opacity: 0.1; transform: translate(2px, 2px); }
+
+  .wild-back .card-back-inner::before { border-color: var(--blue); opacity: 0.15; }
+  .wild-back .card-back-inner::after { border-color: var(--pink); opacity: 0.12; transform: translate(-2px, -2px); }
+  .wild-back .card-back-inner .back-line { border-color: var(--green); opacity: 0.1; transform: translate(2px, 2px); }
+
+  .card-back-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    z-index: 2;
+  }
+
+  /* Card Front */
+  .card-front {
+    transform: rotateY(180deg);
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+  }
+
+  .card-front.who-front { border-top: 3px solid var(--pink); }
+  .card-front.wild-front { border-top: 3px solid var(--blue); }
+
+  .card-front::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 0; right: 0;
+    height: 3px;
+  }
+
+  .card-front.who-front::before { background: var(--green); transform: translateX(3px); opacity: 0.3; }
+  .card-front.who-front::after { content: ''; position: absolute; top: -3px; left: 0; right: 0; height: 3px; background: var(--blue); transform: translateX(-3px); opacity: 0.3; }
+
+  .card-front.wild-front::before { background: var(--pink); transform: translateX(-2px); opacity: 0.4; }
+  .card-front.wild-front::after { content: ''; position: absolute; top: -3px; left: 0; right: 0; height: 3px; background: var(--green); transform: translateX(3px); opacity: 0.3; }
+
+  .card-type {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+  }
+
+  .card-type.who-type { color: var(--pink); }
+  .card-type.wild-type { color: var(--blue); }
+
+  .card-text {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--text);
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .card-number {
+    font-size: 0.6rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    text-align: right;
+    letter-spacing: 0.05em;
+  }
+
+  /* Shuffle Face */
+  .shuffle-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    backface-visibility: hidden;
+    z-index: 5;
+  }
+
+  .shuffle-face.who-shuffle { border-top: 3px solid var(--pink); }
+  .shuffle-face.wild-shuffle { border-top: 3px solid var(--blue); }
+
+  .shuffle-text {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--text);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    opacity: 0.35;
+  }
+
+  .card-container.shuffling .shuffle-face { display: flex; }
+
+  /* Tick flash */
+  .tick-ring {
+    position: absolute;
+    inset: -3px;
+    border-radius: 14px;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  @keyframes tickFlash {
+    0% { opacity: 0.6; }
+    100% { opacity: 0; }
+  }
+
+  .tick-ring.flash { animation: tickFlash 0.12s ease-out forwards; }
+  .tick-ring.who-tick { border: 1.5px solid var(--pink); }
+  .tick-ring.wild-tick { border: 1.5px solid var(--blue); }
+
+  /* Reveal */
+  @keyframes revealCard {
+    0% { transform: rotateX(6deg) scale(0.97); opacity: 0.6; }
+    50% { transform: rotateX(-1deg) scale(1.01); }
+    100% { transform: rotateX(0deg) scale(1); opacity: 1; }
+  }
+
+  .card-container.revealed .card-front { animation: revealCard 0.4s ease-out forwards; }
+  .card-container.revealed .card-back,
+  .card-container.revealed .shuffle-face { display: none; }
+  .card-container.revealed .card-front { transform: none; position: relative; }
+
+  /* Idle float */
+  .card-slot.idle .card-container { animation: idleFloat 5s ease-in-out infinite; }
+  .card-slot:nth-child(2).idle .card-container { animation-delay: 0.6s; }
+
+  @keyframes idleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  /* Controls */
+  .shuffler-controls {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 1rem;
+  }
+
+  .draw-btn {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 14px 44px;
+    border: 1.5px solid var(--pink);
+    background: var(--pink);
+    color: #0C0C14;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  .draw-btn::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 8px;
+    border: 1.5px solid var(--blue);
+    transform: translate(-2px, -1.5px);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+
+  .draw-btn::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 8px;
+    border: 1.5px solid var(--green);
+    transform: translate(2px, 1.5px);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+
+  .draw-btn:hover:not(:disabled)::before,
+  .draw-btn:hover:not(:disabled)::after { opacity: 0.5; }
+  .draw-btn:hover:not(:disabled) { transform: translateY(-1px); }
+  .draw-btn:active:not(:disabled) { transform: translateY(0); }
+  .draw-btn:disabled { opacity: 0.2; cursor: default; }
+
+  .reset-btn {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 14px 28px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .reset-btn:hover { border-color: var(--text-mid); color: var(--text); }
+
+  .shuffler-prompt {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 1.1rem;
+    color: var(--pink);
+    opacity: 0;
+    transition: opacity 0.6s;
+    margin-top: 1.5rem;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .shuffler-prompt.visible { opacity: 1; }
+
+  /* === BACK LINK === */
+  .back-link {
+    text-align: center;
+    padding: 2rem 2rem 3rem;
+  }
+
+  .back-link a {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .back-link a:hover { color: var(--text); }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 560px) {
+    .card-text, .shuffle-text { font-size: 0.95rem; }
+    .shuffler-stage { gap: 10px; }
+    .card-front, .shuffle-face { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div class="mini-logo">
+    <span class="t-pink">DRIFT</span>
+    <span class="t-blue">DRIFT</span>
+    <span class="t-green">DRIFT</span>
+  </div>
+  <h1 class="page-title"><span class="a-pink">Who</span> Needs It? What's the <span class="a-blue">Catch</span>?</h1>
+  <p class="page-subtitle">Draw your Who and Wild cards. These are your constraints.</p>
+</div>
+
+<!-- SHUFFLER -->
+<div class="shuffler-section">
+  <div class="shuffler-stage" id="card-stage">
+
+    <!-- WHO -->
+    <div class="card-slot idle" id="slot-who">
+      <div class="card-container" id="container-who">
+        <div class="card-face card-back who-back">
+          <div class="card-back-inner"><div class="back-line"></div><div class="card-back-label">Who</div></div>
+        </div>
+        <div class="shuffle-face who-shuffle" id="shuffle-who">
+          <div class="card-type who-type">Who</div>
+          <div class="shuffle-text" id="shuffle-text-who"></div>
+        </div>
+        <div class="card-face card-front who-front" id="front-who">
+          <div class="card-type who-type">Who</div>
+          <div class="card-text" id="text-who"></div>
+          <div class="card-number" id="num-who"></div>
+        </div>
+        <div class="tick-ring who-tick" id="tick-who"></div>
+      </div>
+    </div>
+
+    <!-- WILD -->
+    <div class="card-slot idle" id="slot-wild">
+      <div class="card-container" id="container-wild">
+        <div class="card-face card-back wild-back">
+          <div class="card-back-inner"><div class="back-line"></div><div class="card-back-label">Wild</div></div>
+        </div>
+        <div class="shuffle-face wild-shuffle" id="shuffle-wild">
+          <div class="card-type wild-type">Wild</div>
+          <div class="shuffle-text" id="shuffle-text-wild"></div>
+        </div>
+        <div class="card-face card-front wild-front" id="front-wild">
+          <div class="card-type wild-type">Wild</div>
+          <div class="card-text" id="text-wild"></div>
+          <div class="card-number" id="num-wild"></div>
+        </div>
+        <div class="tick-ring wild-tick" id="tick-wild"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="shuffler-prompt" id="shuffler-prompt">Now... what would you build?</div>
+
+  <div class="shuffler-controls">
+    <button class="draw-btn" id="draw-btn" onclick="draw()">Draw Cards</button>
+    <button class="reset-btn" onclick="resetAll()">Reset</button>
+  </div>
+</div>
+
+<!-- BACK -->
+<div class="back-link">
+  <a href="play.html">&larr; Back to How to Play</a>
+</div>
+
+<script>
+const whoCards=["Teenagers","First-daters","Long-distance friends","Night shift workers","Someone who just moved","Street artists","Grandparents","New parents","A shopkeeper","Solo travelers","Someone starting over","Neighbors","Roommates","Someone in a waiting room","Someone who commutes far","The new person at work","Siblings","A barista","Someone training for something","A retiree","Someone who hosts a lot","A long-term couple","Old friends reconnecting","A taxi driver","Someone who works from home","A street vendor","Regulars at a bar","A volunteer","A small business owner","Someone who just retired","A farmer","A wedding planner","Someone learning to cook","A bus driver","Someone who stays late","A mechanic","Someone between jobs","A librarian","A mail carrier","A night owl","A night security guard","A dog walker","Coworkers","A crossing guard","A nurse","Someone living alone","A coach","A translator","Someone who walks everywhere","A caretaker"];
+const wildCards=["It lasts exactly 3 minutes","No text allowed","It has exactly one button","It requires trust to use","It runs on sound only","It can't be used indoors","It requires two people minimum","You use it once a day","It uses the camera","It fits on one screen","It involves a real-world object","It has a beginning and an end","It changes based on who's nearby","It involves drawing","It creates something you can send to someone","It uses location","It only works once a week","It involves a countdown","It produces a different result every time","It removes something instead of adding something","It involves trading","It has a time limit","It must involve food","It only works at night","It can't be used alone","It involves a daily routine","It requires your voice","It outputs something physical","It has no interface — just a notification","It takes exactly 30 seconds","It only stores one thing at a time","It uses weather data","It requires a decision","It connects two people who don't know each other","It works through a question","It has no save function","It can only be used in one place","It involves waiting","It resets every 24 hours","It needs your hands","It uses a timer","It's limited to 5 words or less","It involves collecting","It can only hold one message","It works differently each season","It takes an input from your body","It must be shared to work","It only works during a commute","It involves a map","It disappears after one use"];
+
+let isDrawing = false;
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+async function draw() {
+  if (isDrawing) return;
+  isDrawing = true;
+
+  document.getElementById('draw-btn').disabled = true;
+  document.getElementById('shuffler-prompt').classList.remove('visible');
+
+  ['who', 'wild'].forEach(type => {
+    const slot = document.getElementById(`slot-${type}`);
+    const container = document.getElementById(`container-${type}`);
+    slot.classList.remove('idle');
+    container.classList.remove('revealed', 'shuffling');
+    container.querySelector('.card-back').style.display = '';
+    container.querySelector('.shuffle-face').style.display = '';
+    container.querySelector('.card-front').style.transform = 'rotateY(180deg)';
+    container.querySelector('.card-front').style.position = 'absolute';
+  });
+
+  const finalWho = pick(whoCards);
+  const finalWild = pick(wildCards);
+
+  await animateCard('who', whoCards, finalWho, whoCards.indexOf(finalWho) + 1);
+  await delay(500);
+  await animateCard('wild', wildCards, finalWild, wildCards.indexOf(finalWild) + 1);
+
+  await delay(600);
+  document.getElementById('shuffler-prompt').classList.add('visible');
+  document.getElementById('draw-btn').disabled = false;
+  isDrawing = false;
+}
+
+async function animateCard(type, deck, finalCard, cardNum) {
+  const container = document.getElementById(`container-${type}`);
+  const shuffleText = document.getElementById(`shuffle-text-${type}`);
+  const tick = document.getElementById(`tick-${type}`);
+
+  container.querySelector('.card-back').style.display = 'none';
+  container.classList.add('shuffling');
+
+  const shuffled = shuffle(deck);
+  const totalTicks = 14;
+
+  for (let i = 0; i < totalTicks; i++) {
+    const candidate = i === totalTicks - 1 ? finalCard : shuffled[i % shuffled.length];
+    shuffleText.textContent = candidate;
+
+    tick.classList.remove('flash');
+    void tick.offsetWidth;
+    tick.classList.add('flash');
+
+    const progress = i / totalTicks;
+    const speed = 55 + (progress * progress * 320);
+    await delay(speed);
+  }
+
+  container.classList.remove('shuffling');
+  container.classList.add('revealed');
+  document.getElementById(`text-${type}`).textContent = finalCard;
+  document.getElementById(`num-${type}`).textContent = `${cardNum} / ${deck.length}`;
+  tick.classList.remove('flash');
+}
+
+function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+function resetAll() {
+  isDrawing = false;
+  document.getElementById('shuffler-prompt').classList.remove('visible');
+
+  ['who', 'wild'].forEach(type => {
+    const slot = document.getElementById(`slot-${type}`);
+    const container = document.getElementById(`container-${type}`);
+    slot.classList.add('idle');
+    container.classList.remove('revealed', 'shuffling');
+    container.querySelector('.card-back').style.display = '';
+    container.querySelector('.shuffle-face').style.display = '';
+    container.querySelector('.card-front').style.transform = 'rotateY(180deg)';
+    container.querySelector('.card-front').style.position = 'absolute';
+  });
+}
+</script>
+</body>
+</html>
